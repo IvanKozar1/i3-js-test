@@ -8,10 +8,10 @@ showResultBtnElement.addEventListener('click', questionResults)
 slideElements.addEventListener('click', slideThrough);
 
 for(const previousButtonElement of previousButtonElements) {
-    previousButtonElement.addEventListener('click', slideBackward);
+    previousButtonElement.addEventListener('click', slide);
 }
 
 for(const nextButtonElement of nextButtonElements){
-    nextButtonElement.addEventListener('click', slideForward)
+    nextButtonElement.addEventListener('click', slide)
 }
 

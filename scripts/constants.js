@@ -11,10 +11,14 @@ const slideTwo = "slideTwo";
 const slideThree = "slideThree";
 const slideFour = "slideFour";
 
+const slides = [slideOne, slideTwo, slideThree, slideFour];
+
 const questionOne = "questionOne";
 const questionTwo = "questionTwo";
 const questionThree = "questionThree";
 const questionFour = "questionFour";
+
+const questions = [questionOne, questionTwo, questionThree, questionFour];
 
 const QuestionAnswers = [[], [], [], []];
 

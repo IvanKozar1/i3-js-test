@@ -2,206 +2,109 @@ function slideThrough(event) {
   if (event.target.tagName !== 'LI') {
     return;
   }
-
-  if (event.target.textContent === '1') {
-    if (QuestionAnswers[0].length === 0) {
-      const randomNumberOfAnswers = Math.floor(Math.random() * 7 + 1) + 1;
-      for (let i = 1; i <= randomNumberOfAnswers; i++) {
-        const list = document.createElement('li');
-        QuestionAnswers[0].push(i);
-        list.textContent = i;
-        list.classList.add('original-color-li');
-        list.addEventListener('click', answeredQuestion);
-        document.getElementById('renderFirstAnswers').appendChild(list);
-      }
+  switch (event.target.textContent) {
+    case '1': {
+      renderAnswers(0, 'renderFirstAnswers', event.target.id, questionOne);
+      break;
     }
-    removeHighlight([slideTwo, slideThree, slideFour]);
-    setShow(questionOne);
-    setHide([questionTwo, questionThree, questionFour]);
-    addHighlight(event.target);
-  } else if (event.target.textContent === '2') {
-    if (QuestionAnswers[1].length === 0) {
-      const randomNumberOfAnswers = Math.floor(Math.random() * 7 + 1) + 1;
-      for (let i = 1; i <= randomNumberOfAnswers; i++) {
-        const list = document.createElement('li');
-        QuestionAnswers[1].push(i);
-        list.textContent = i;
-        list.classList.add('original-color-li');
-        list.addEventListener('click', answeredQuestion);
-        document.getElementById('renderSecondAnswers').appendChild(list);
-      }
+    case '2': {
+      renderAnswers(1, 'renderSecondAnswers', event.target.id, questionTwo);
+      break;
     }
-    removeHighlight([slideOne, slideThree, slideFour]);
-    setShow(questionTwo);
-    setHide([questionOne, questionThree, questionFour]);
-    addHighlight(event.target);
-  } else if (event.target.textContent === '3') {
-    if (QuestionAnswers[2].length === 0) {
-      const randomNumberOfAnswers = Math.floor(Math.random() * 7 + 1) + 1;
-      for (let i = 1; i <= randomNumberOfAnswers; i++) {
-        const list = document.createElement('li');
-        QuestionAnswers[2].push(i);
-        list.textContent = i;
-        list.classList.add('original-color-li');
-        list.addEventListener('click', answeredQuestion);
-        document.getElementById('renderThirdAnswers').appendChild(list);
-      }
+    case '3': {
+      renderAnswers(2, 'renderThirdAnswers', event.target.id, questionThree);
+      break;
     }
-    removeHighlight([slideTwo, slideOne, slideFour]);
-    setShow(questionThree);
-    setHide([questionOne, questionTwo, questionFour]);
-    addHighlight(event.target);
-  } else {
-    if (QuestionAnswers[3].length === 0) {
-      const randomNumberOfAnswers = Math.floor(Math.random() * 7 + 1) + 1;
-      for (let i = 1; i <= randomNumberOfAnswers; i++) {
-        const list = document.createElement('li');
-        QuestionAnswers[3].push(i);
-        list.textContent = i;
-        list.classList.add('original-color-li');
-        list.addEventListener('click', answeredQuestion);
-        document.getElementById('renderForthAnswers').appendChild(list);
-      }
+    case '4': {
+      renderAnswers(3, 'renderForthAnswers', event.target.id, questionFour);
+      break;
     }
-    removeHighlight([slideTwo, slideThree, slideOne]);
-    setShow(questionFour);
-    setHide([questionOne, questionTwo, questionThree]);
-    addHighlight(event.target);
   }
 }
 
-function removeHighlight(elements) {
-  for (const element of elements) {
-    document.getElementById(element).classList.remove('navbar-click-highlight');
-    document.getElementById(element).classList.add('default-navbar');
+function renderAnswers(questionAnswersIdx, elementId, targetId, question) {
+  if (QuestionAnswers[questionAnswersIdx].length === 0) {
+    for (let i = 1; i <= randomNumberOfAnswers(); i++) {
+      const list = document.createElement('li');
+      QuestionAnswers[questionAnswersIdx].push(i);
+      list.textContent = i;
+      list.classList.add('original-color-li');
+      list.addEventListener('click', answeredQuestion);
+      document.getElementById(elementId).appendChild(list);
+    }
+  }
+  displayQuestion(question);
+  highlightSlide(targetId);
+}
+
+const displayQuestion = (show) => {
+  for (let question of questions) {
+    if (question === show) {
+      document.getElementById(show).style.display = 'block';
+      continue;
+    }
+    document.getElementById(question).style.display = 'none';
   }
 }
 
-const addHighlight = (element) => {
-  element.classList.add('navbar-click-highlight');
-  element.classList.remove('default-navbar');
-};
+const highlightSlide = (slide) => {
+  for (let s of slides) {
+    if (s === slide) {
+      document.getElementById(slide).classList.add('navbar-click-highlight');
+      document.getElementById(slide).classList.remove('default-navbar');
+      continue;
+    }
+    document.getElementById(s).classList.remove('navbar-click-highlight');
+    document.getElementById(s).classList.add('default-navbar');
+  }
+}
 
-const setHide = (elements) => {
-  elements.forEach((element) => {
-    document.getElementById(element).style.display = 'none';
-  });
-};
-
-const setShow = (element) => {
-  document.getElementById(element).style.display = 'block';
-};
+function displayLogic(event, slide, questionAnswers) {
+  if (questionAnswers.length < parseInt(slide.textContent) + 2) {
+    if (event.target.classList.contains('original-color-li')) {
+      saveAnswers(event.target.textContent, slide.id);
+      toggleSelectedAnswer(event);
+      if (questionAnswers.length > 0) {
+        slide.classList.add('highlight-navbar');
+      }
+    } else {
+      toggleSelectedAnswer(event);
+      deleteAnswers(event.target.textContent, slide.id);
+      slide.classList.remove('highlight-navbar');
+    }
+    showResultButton();
+    return;
+  }
+  if (event.target.classList.contains('original-color-li')) {
+      alertMessage();
+    } 
+    else {
+      toggleSelectedAnswer(event);
+      deleteAnswers(event.target.textContent, slide.id);
+    }
+  showResultButton();
+}
 
 function answeredQuestion(event) {
   const slide = findActiveSlide();
-  if (slide.id === slideOne) {
-    if (firstQuestionAnswers.length < parseInt(slide.textContent) + 2) {
-      if (event.target.classList.contains('original-color-li')) {
-        saveAnswers(event.target.textContent, slide.id);
-        toggleSelectedAnswer(event);
-        if (firstQuestionAnswers.length > 0) {
-          slide.classList.add('highlight-navbar');
-        }
-      } else {
-        toggleSelectedAnswer(event);
-        deleteAnswers(event.target.textContent, slide.id);
-        slide.classList.remove('highlight-navbar');
-      }
-    } else if (
-      firstQuestionAnswers.length ===
-      parseInt(slide.textContent) + 2
-    ) {
-      if (event.target.classList.contains('original-color-li')) {
-        alertMessage();
-      } else {
-        toggleSelectedAnswer(event);
-        deleteAnswers(event.target.textContent, slide.id);
-      }
+  switch (slide.id) {
+    case slideOne: {
+      displayLogic(event, slide, firstQuestionAnswers);
+      break;
+    }
+    case slideTwo: {
+      displayLogic(event, slide, secondQuestionAnswers);
+      break;
+    }
+    case slideThree: {
+      displayLogic(event, slide, thirdQuestionAnswers);
+      break;
+    }
+    case slideFour: {
+      displayLogic(event, slide, forthQuestionAnswers);
+      break;
     }
   }
-  if (slide.id === slideTwo) {
-    if (secondQuestionAnswers.length < parseInt(slide.textContent) + 2) {
-      if (event.target.classList.contains('original-color-li')) {
-        saveAnswers(event.target.textContent, slide.id);
-        toggleSelectedAnswer(event);
-        if (secondQuestionAnswers.length > 0) {
-          slide.classList.add('highlight-navbar');
-        }
-      } else {
-        toggleSelectedAnswer(event);
-        deleteAnswers(event.target.textContent, slide.id);
-        if (secondQuestionAnswers.length === 0) {
-          slide.classList.remove('highlight-navbar');
-        }
-      }
-    } else if (
-      secondQuestionAnswers.length ===
-      parseInt(slide.textContent) + 2
-    ) {
-      if (event.target.classList.contains('original-color-li')) {
-        alertMessage();
-      } else {
-        toggleSelectedAnswer(event);
-        deleteAnswers(event.target.textContent, slide.id);
-      }
-    }
-  }
-  if (slide.id === slideThree) {
-    if (thirdQuestionAnswers.length < parseInt(slide.textContent) + 2) {
-      if (event.target.classList.contains('original-color-li')) {
-        saveAnswers(event.target.textContent, slide.id);
-        toggleSelectedAnswer(event);
-        if (thirdQuestionAnswers.length > 0) {
-          slide.classList.add('highlight-navbar');
-        }
-      } else {
-        toggleSelectedAnswer(event);
-        deleteAnswers(event.target.textContent, slide.id);
-        if (thirdQuestionAnswers.length === 0) {
-          slide.classList.remove('highlight-navbar');
-        }
-      }
-    } else if (
-      thirdQuestionAnswers.length ===
-      parseInt(slide.textContent) + 2
-    ) {
-      if (event.target.classList.contains('original-color-li')) {
-        alertMessage();
-      } else {
-        toggleSelectedAnswer(event);
-        deleteAnswers(event.target.textContent, slide.id);
-      }
-    }
-  }
-  if (slide.id === slideFour) {
-    if (forthQuestionAnswers.length < parseInt(slide.textContent) + 2) {
-      if (event.target.classList.contains('original-color-li')) {
-        saveAnswers(event.target.textContent, slide.id);
-        toggleSelectedAnswer(event);
-        if (forthQuestionAnswers.length > 0) {
-          slide.classList.add('highlight-navbar');
-        }
-      } else {
-        toggleSelectedAnswer(event);
-        deleteAnswers(event.target.textContent, slide.id);
-        if (forthQuestionAnswers.length === 0) {
-          slide.classList.remove('highlight-navbar');
-        }
-      }
-    } else if (
-      forthQuestionAnswers.length ===
-      parseInt(slide.textContent) + 2
-    ) {
-      if (event.target.classList.contains('original-color-li')) {
-        alertMessage();
-      } else {
-        toggleSelectedAnswer(event);
-        deleteAnswers(event.target.textContent, slide.id);
-      }
-    }
-  }
-
-  showResultButton();
 }
 
 function findActiveSlide() {
@@ -219,46 +122,58 @@ function toggleSelectedAnswer(event) {
 }
 
 function saveAnswers(answer, slideId) {
-  if (slideId === slideOne) {
-    firstQuestionAnswers.push(answer);
+  switch (slideId) {
+    case slideOne: {
+      addAnswer(firstQuestionAnswers, answer);
+      break;
+    }
+    case slideTwo: {
+      addAnswer(secondQuestionAnswers, answer);
+      break;
+    }
+    case slideThree: {
+      addAnswer(thirdQuestionAnswers, answer);
+      break;
+    }
+    case slideFour: {
+      addAnswer(forthQuestionAnswers, answer);
+      break;
+    }
   }
-  if (slideId === slideTwo) {
-    secondQuestionAnswers.push(answer);
-  }
-  if (slideId === slideThree) {
-    thirdQuestionAnswers.push(answer);
-  }
-  if (slideId === slideFour) {
-    forthQuestionAnswers.push(answer);
-  }
+}
+
+function addAnswer(questionAnswers, answer) {
+  questionAnswers.push(answer);
 }
 
 function deleteAnswers(answer, slideId) {
-  if (slideId === slideOne) {
-    const index = firstQuestionAnswers.indexOf(answer);
-    firstQuestionAnswers.splice(index, 1);
-  }
-  if (slideId === slideTwo) {
-    const index = secondQuestionAnswers.indexOf(answer);
-    secondQuestionAnswers.splice(index, 1);
-  }
-  if (slideId === slideThree) {
-    const index = thirdQuestionAnswers.indexOf(answer);
-    thirdQuestionAnswers.splice(index, 1);
-  }
-  if (slideId === slideFour) {
-    const index = forthQuestionAnswers.indexOf(answer);
-    forthQuestionAnswers.splice(index, 1);
+  switch (slideId) {
+    case slideOne: {
+      removeAnswer(firstQuestionAnswers, answer);
+      break;
+    }
+    case slideTwo: {
+      removeAnswer(secondQuestionAnswers, answer);
+      break;
+    }
+    case slideThree: {
+      removeAnswer(thirdQuestionAnswers, answer);
+      break;
+    }
+    case slideFour: {
+      removeAnswer(forthQuestionAnswers, answer);
+      break;
+    }
   }
 }
 
+function removeAnswer(questionAnswers, answer) {
+  const index = questionAnswers.indexOf(answer);
+  questionAnswers.splice(index, 1);
+}
+
 function questionResults() {
-  if (
-    firstQuestionAnswers.length > 0 &&
-    secondQuestionAnswers.length > 0 &&
-    thirdQuestionAnswers.length > 0 &&
-    forthQuestionAnswers.length > 0
-  ) {
+  if (areAllAnswersAnswered()) {
     alert(
       'ODGOVORI: \n' +
         'Pitanje 1: ' +
@@ -274,22 +189,20 @@ function questionResults() {
 }
 
 function showResultButton() {
-  if (
-    firstQuestionAnswers.length > 0 &&
-    secondQuestionAnswers.length > 0 &&
-    thirdQuestionAnswers.length > 0 &&
-    forthQuestionAnswers.length > 0
-  ) {
+  if (areAllAnswersAnswered()) {
     document.getElementById('result-btn').disabled = false;
-    document
-      .getElementById('result-btn')
-      .classList.add('show-result-btn-hover');
-  } else {
+    document.getElementById('result-btn').classList.add('show-result-btn-hover');
+    return;
+  } 
     document.getElementById('result-btn').disabled = true;
-    document
-      .getElementById('result-btn')
-      .classList.remove('show-result-btn-hover');
-  }
+    document.getElementById('result-btn').classList.remove('show-result-btn-hover');
+}
+
+function areAllAnswersAnswered() {
+  return firstQuestionAnswers.length > 0 
+  && secondQuestionAnswers.length > 0 
+  && thirdQuestionAnswers.length > 0 
+  && forthQuestionAnswers.length > 0;
 }
 
 function alertMessage() {
@@ -300,137 +213,39 @@ function alertMessage() {
   }, 3000);
 }
 
-
-
-
-
-
-function slideForward(event) {
+function slide(event) {
   const btn = event.target.id;
-  if (btn === 'first-next') {
-    if (QuestionAnswers[1].length === 0) {
-      const randomNumberOfAnswers = Math.floor(Math.random() * 7 + 1) + 1;
-      for (let i = 1; i <= randomNumberOfAnswers; i++) {
-        const list = document.createElement('li');
-        QuestionAnswers[1].push(i);
-        list.textContent = i;
-        list.classList.add('original-color-li');
-        list.addEventListener('click', answeredQuestion);
-        document.getElementById('renderSecondAnswers').appendChild(list);
-      }
+  switch (btn) {
+    case 'first-next': {
+      renderAnswers(1, 'renderSecondAnswers', slideTwo, questionTwo);
+      break;
     }
-    removeHighlight([slideOne, slideThree, slideFour]);
-    setShow(questionTwo);
-    setHide([questionOne, questionThree, questionFour]); 
-    document.getElementById('slideTwo').classList.remove('default-navbar');
-      document.getElementById('slideTwo').classList.add('navbar-click-highlight');
-  }else if(btn === 'second-next') {
-    if (QuestionAnswers[2].length === 0) {
-      const randomNumberOfAnswers = Math.floor(Math.random() * 7 + 1) + 1;
-      for (let i = 1; i <= randomNumberOfAnswers; i++) {
-        const list = document.createElement('li');
-        QuestionAnswers[2].push(i);
-        list.textContent = i;
-        list.classList.add('original-color-li');
-        list.addEventListener('click', answeredQuestion);
-        document.getElementById('renderThirdAnswers').appendChild(list);
-      }
+    case 'second-next': {
+      renderAnswers(2, 'renderThirdAnswers', slideThree, questionThree);
+      break;
     }
-    removeHighlight([slideTwo, slideOne, slideFour]);
-    setShow(questionThree);
-    setHide([questionOne, questionTwo, questionFour]);
-    document.getElementById('slideThree').classList.remove('default-navbar');
-      document.getElementById('slideThree').classList.add('navbar-click-highlight');
-    
-  } else {
-    if (QuestionAnswers[3].length === 0) {
-      const randomNumberOfAnswers = Math.floor(Math.random() * 7 + 1) + 1;
-      for (let i = 1; i <= randomNumberOfAnswers; i++) {
-        const list = document.createElement('li');
-        QuestionAnswers[3].push(i);
-        list.textContent = i;
-        list.classList.add('original-color-li');
-        list.addEventListener('click', answeredQuestion);
-        document.getElementById('renderForthAnswers').appendChild(list);
-      }
+    case 'third-next': {
+      renderAnswers(3, 'renderForthAnswers', slideFour, questionFour);
+      break;
     }
-    removeHighlight([slideTwo, slideThree, slideOne]);
-    setShow(questionFour);
-    setHide([questionOne, questionTwo, questionThree]);
-    document.getElementById('slideFour').classList.remove('default-navbar');
-      document.getElementById('slideFour').classList.add('navbar-click-highlight');
-  }
+    case 'second-prev': {
+      renderAnswers(0, 'renderForthAnswers', slideOne, questionOne);
+      break;
+    }
+    case 'third-prev': {
+      renderAnswers(1, 'renderSecondAnswers', slideTwo, questionTwo);
+      break;
+    }
+    case 'fourth-prev': {
+      renderAnswers(2, 'renderThirdAnswers', slideThree, questionThree);
+      break;
+    }
+  }  
 }
 
-function slideBackward(event) {
-  const btn = event.target.id;
-  if (btn === 'second-prev') {
-    if (QuestionAnswers[0].length === 0) {
-      const randomNumberOfAnswers = Math.floor(Math.random() * 7 + 1) + 1;
-      for (let i = 1; i <= randomNumberOfAnswers; i++) {
-        const list = document.createElement('li');
-        QuestionAnswers[0].push(i);
-        list.textContent = i;
-        list.classList.add('original-color-li');
-        list.addEventListener('click', answeredQuestion);
-        document.getElementById('renderFirstAnswers').appendChild(list);
-      }}
-      removeHighlight([slideTwo, slideThree, slideFour]);
-      setShow(questionOne);
-      setHide([questionTwo, questionThree, questionFour]);
 
-      document.getElementById('slideOne').classList.remove('default-navbar');
-      document.getElementById('slideOne').classList.add('navbar-click-highlight');
-  }else if( btn === 'third-prev') {
-    if (QuestionAnswers[1].length === 0) {
-      const randomNumberOfAnswers = Math.floor(Math.random() * 7 + 1) + 1;
-      for (let i = 1; i <= randomNumberOfAnswers; i++) {
-        const list = document.createElement('li');
-        QuestionAnswers[1].push(i);
-        list.textContent = i;
-        list.classList.add('original-color-li');
-        list.addEventListener('click', answeredQuestion);
-        document.getElementById('renderSecondAnswers').appendChild(list);
-      }
-    }
-    removeHighlight([slideOne, slideThree, slideFour]);
-    setShow(questionTwo);
-    setHide([questionOne, questionThree, questionFour]);
-    document.getElementById('slideTwo').classList.remove('default-navbar');
-    document.getElementById('slideTwo').classList.add('navbar-click-highlight');
-  } else {
-    if (QuestionAnswers[2].length === 0) {
-      const randomNumberOfAnswers = Math.floor(Math.random() * 7 + 1) + 1;
-      for (let i = 1; i <= randomNumberOfAnswers; i++) {
-        const list = document.createElement('li');
-        QuestionAnswers[2].push(i);
-        list.textContent = i;
-        list.classList.add('original-color-li');
-        list.addEventListener('click', answeredQuestion);
-        document.getElementById('renderThirdAnswers').appendChild(list);
-      }
-    }
-    removeHighlight([slideTwo, slideOne, slideFour]);
-    setShow(questionThree);
-    setHide([questionOne, questionTwo, questionFour]);
-    document.getElementById('slideThree').classList.remove('default-navbar');
-      document.getElementById('slideThree').classList.add('navbar-click-highlight');
-  }
+function randomNumberOfAnswers() {
+  return Math.floor(Math.random() * 7 + 1) + 1;
 }
 
-window.onload = function renderFirstQuestionAnswers() {
-  if (QuestionAnswers[0].length === 0) {
-    const randomNumberOfAnswers = Math.floor(Math.random() * 7 + 1) + 1;
-    for (let i = 1; i <= randomNumberOfAnswers; i++) {
-      const list = document.createElement('li');
-      QuestionAnswers[0].push(i);
-      list.textContent = i;
-      list.classList.add('original-color-li');
-      list.addEventListener('click', answeredQuestion);
-      document.getElementById('renderFirstAnswers').appendChild(list);
-    }
-  }
-  setShow(questionOne);
-  document.getElementById('slideOne').classList.add('navbar-click-highlight');
-  document.getElementById('slideOne').classList.remove('default-navbar');
-}
+window.onload = renderAnswers(0, 'renderFirstAnswers', slideOne, questionOne);
